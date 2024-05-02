@@ -10,7 +10,8 @@
 #include <QLabel>
 #include <QDebug>
 #include <QPushButton>
-#include <memory>
+#include <QTextEdit>
+#include <QCheckBox>
 
 #include "binarytree.h"
 #include "scalablegraphicsview.h"
@@ -22,33 +23,53 @@ class TreeWindow : public QWidget
 {
     Q_OBJECT
 public:
+    enum OutputType {
+        TextOutput,
+        GraphicOutput,
+        BothOutput
+    };
+
     explicit TreeWindow(QWidget *parent = nullptr);
-    void randomInsertion(int start, int end, int amount);
+    void randomInsertion(int start, int end, int amount, bool checkBox, QString pathDic, int output);
     void enterTree();
+    void fromFile(const QString &filePath, OutputType outputType);
+    void textEditChanged();
 signals:
     void clickedExit();
 private slots:
     void exit();
     void reGen();
+    void textToTree();
 private:
     // Вычисляет ширину уровня в дереве
     qreal calculateLevelWidth(Node *node);
     // Добавляет узлы дерева на сцену
     void addNodesToScene(QGraphicsScene& scene, Node* node, qreal x, qreal y, qreal offsetY, qreal levelWidth);
 private:
-    std::unique_ptr<BinaryTree> m_tree;
-    std::unique_ptr<QGraphicsScene> m_scene;
-    std::unique_ptr<ScalableGraphicsView> m_view;
+
+    BinaryTree *m_tree;
+    QGraphicsScene *m_scene;
+    ScalableGraphicsView *m_view;
 
     QLabel m_quantityLabel;
 
     QPushButton *m_reGenButton;
     QPushButton *m_searchButton;
     QPushButton *m_exitButton;
+    QPushButton *m_textToTree;
 
     int m_start;
     int m_end;
     int m_quantity;
+    int m_output;
+
+    bool m_checkBox;
+    QString m_patchDic;
+
+    QTextEdit *m_textEdit;
+    QTextEdit *m_treeOutput;
+
+    QCheckBox *m_dynamicUpdateCheckBox;
 };
 
 #endif // TREEWINDOW_H

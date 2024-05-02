@@ -8,6 +8,8 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QButtonGroup>
+#include <QCheckBox>
+#include <QFileDialog>
 
 class GenDialog : public QDialog
 {
@@ -18,10 +20,17 @@ public:
     QString getEnd();
     QString getQuality();
     QString getSelectedOption();
+    void toggleDirectorySelection(int state);
+    void selectDirectory();
+    bool getCheckbox();
+    QString getPathDic();
 private:
     QLineEdit *m_start;
     QLineEdit *m_end;
     QLineEdit *m_quantity;
+    QCheckBox *m_saveToFileCheckbox;
+    QLineEdit *m_directoryLine;
+    QPushButton *m_directoryButton;
     QPushButton *m_okButton;
     QPushButton *m_cancelButton;
 };

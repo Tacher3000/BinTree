@@ -7,6 +7,8 @@
 #include "gendialog.h"
 #include "treewindow.h"
 #include <QDebug>
+#include <QFileDialog>
+#include <QDialogButtonBox>
 
 
 class MainWindow : public QMainWindow
@@ -19,6 +21,7 @@ private slots:
     void openGenDialog();
     void homeScreen();
     void enterTree();
+    void searchTree();
 private:
     QStackedWidget *m_stackedWidget;
     HomeScreen *m_homeScreen;

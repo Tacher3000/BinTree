@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
     m_homeScreen = new HomeScreen(this);
     connect(m_homeScreen, &HomeScreen::clickedGenerator, this, &MainWindow::openGenDialog);
     connect(m_homeScreen, &HomeScreen::clickedEnter, this, &MainWindow::enterTree);
+    connect(m_homeScreen, &HomeScreen::clickedSearch, this, &MainWindow::searchTree);
     m_stackedWidget->addWidget(m_homeScreen);
 
     m_treeWindow = new TreeWindow(this);
@@ -22,23 +23,74 @@ void MainWindow::openGenDialog()
         QString selectedOption = genDialog.getSelectedOption();
 
         if (selectedOption == "ТЕКСТОВЫЙ ВЫВОД") {
-
-        } else if (selectedOption == "ГРАФИЧЕСКИЙ ВЫВОД (НЕ РЕКОМЕНДУЕЦА ИСПОЛЬЗОВАТЬ ЕСЛИ ЕОЛЛИЧЕСТВО ВЕРШИН БОЛЬШЕ 100.000)") {
-            m_treeWindow->randomInsertion(genDialog.getStart().toInt(), genDialog.getEnd().toInt(), genDialog.getQuality().toInt());
-            m_stackedWidget->setCurrentIndex(1);
+            m_treeWindow->randomInsertion(genDialog.getStart().toInt(), genDialog.getEnd().toInt(), genDialog.getQuality().toInt(), genDialog.getCheckbox(), genDialog.getPathDic(), 1);
+        } else if (selectedOption == "ГРАФИЧЕСКИЙ ВЫВОД (НЕ РЕКОМЕНДУЕЦА ИСПОЛЬЗОВАТЬ ЕСЛИ КОЛЛИЧЕСТВО ВЕРШИН БОЛЬШЕ 100.000)") {
+            m_treeWindow->randomInsertion(genDialog.getStart().toInt(), genDialog.getEnd().toInt(), genDialog.getQuality().toInt(), genDialog.getCheckbox(), genDialog.getPathDic(), 2);
         } else if (selectedOption == "БЕЗ ВЫВОДА") {
-
+            m_treeWindow->randomInsertion(genDialog.getStart().toInt(), genDialog.getEnd().toInt(), genDialog.getQuality().toInt(), genDialog.getCheckbox(), genDialog.getPathDic(), 3);
         }
+        m_stackedWidget->setCurrentIndex(1);
+
     }
 }
 
 void MainWindow::homeScreen()
 {
     m_stackedWidget->setCurrentIndex(0);
+
+    delete m_treeWindow;
+    m_treeWindow = new TreeWindow(this);
+    connect(m_treeWindow, &TreeWindow::clickedExit, this, &MainWindow::homeScreen);
+    m_stackedWidget->addWidget(m_treeWindow);
 }
 
 void MainWindow::enterTree()
 {
     m_treeWindow->enterTree();
     m_stackedWidget->setCurrentIndex(1);
+}
+
+void MainWindow::searchTree()
+{
+    // Создаем диалоговое окно для выбора типа вывода
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Выберите тип вывода"));
+    QVBoxLayout layout(&dialog);
+
+    // Создаем чекбоксы для текстового и графического вывода
+    QCheckBox *textCheckBox = new QCheckBox(tr("Текстовый вывод"), &dialog);
+    QCheckBox *graphicCheckBox = new QCheckBox(tr("Графический вывод"), &dialog);
+    layout.addWidget(textCheckBox);
+    layout.addWidget(graphicCheckBox);
+
+    // Создаем кнопку "OK" для подтверждения выбора
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                               Qt::Horizontal, &dialog);
+    layout.addWidget(&buttonBox);
+
+    // Обрабатываем нажатие кнопки "OK"
+    QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    // Если диалоговое окно было подтверждено, обрабатываем выбор
+    if (dialog.exec() == QDialog::Accepted) {
+        bool textOutput = textCheckBox->isChecked();
+        bool graphicOutput = graphicCheckBox->isChecked();
+
+        // Открываем диалоговое окно выбора файла
+        QString filePath = QFileDialog::getOpenFileName(this, tr("Выберите файл"), QDir::homePath(), tr("Текстовые файлы (*.txt)"));
+
+        if (!filePath.isEmpty()) {
+            // В зависимости от выбора, вызываем соответствующую функцию и передаем путь к файлу
+            if (textOutput && !graphicOutput) {
+                m_treeWindow->fromFile(filePath, TreeWindow::TextOutput);
+            } else if (graphicOutput && !textOutput) {
+                m_treeWindow->fromFile(filePath, TreeWindow::GraphicOutput);
+            } else if (textOutput && graphicOutput) {
+                m_treeWindow->fromFile(filePath, TreeWindow::BothOutput);
+            }
+
+            m_stackedWidget->setCurrentIndex(1);
+        }
+    }
 }
