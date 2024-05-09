@@ -12,6 +12,7 @@
 #include <QtMath>
 #include <QFile>
 #include <QTextEdit>
+#include <QElapsedTimer>
 
 // Определение класса Node, представляющего узел бинарного дерева
 class Node {
@@ -19,12 +20,15 @@ public:
     Node(int value, int id);
 
     // Метод для сравнения узлов
-
     bool equals(Node* other);
+
+    int getId();
+
     int value;
     int id;
     Node* left;
     Node* right;
+    size_t size();
 };
 
 // Определение класса BinaryTree, представляющего бинарное дерево
@@ -39,38 +43,42 @@ public:
     void iterativInsert(int value);
 
     // Метод для случайной вставки значений в дерево
-    void random_insertion(int start, int end, int amount);
+    void randomInsertion(int start, int end, int amount);
 
     // Метод для поиска поддеревьев с заданной структурой
-    QList<Node*> find_subtrees(Node* subtree_structure);
+    QList<Node*> findSubtrees(Node* subtree_structure);
 
+    void writeNodeToFile(Node *node, QTextStream &out);
 
-    // Вспомогательный метод для рекурсивной вставки узла в дерево
+    void writeTreeToFile(const QString &filename);
+
+    void addNodeToTreeRecursive(Node *currentNode, Node *newNode);
+
+    void addNodeToTree(Node *node);
+
+    void readTreeFromFile(const QString &filename);
+
+    void readTreeFromText(const QString &text);
+
+    void printTree(QTextEdit *textEdit);
+
+    Node *getRoot();
+
+    size_t size();
+private:
     Node* m_recursiveInsertNode(int value, Node* node);
 
     Node* m_iterativInsertNode(int value, Node* node);
 
+    void m_printTreeRecursive(Node *node, const QString &prefix, bool isLast, QString &treeOutput);
 
-    // Вспомогательный метод для поиска поддеревьев с заданной структурой (рекурсивный)
-    void dfs(Node* node, Node* subtree_structure, QList<Node*>& result);
+    void m_dfs(Node* node, Node* subtree_structure, QList<Node*>& result);
 
-// private:
-    // Корневой узел дерева
+private:
     Node* root;
 
     // Количество узлов в дереве
     int nodes_amount;
-
-    void write_node_to_file(Node *node, QTextStream &out);
-    void write_tree_to_file(const QString &filename);
-
-
-    void addNodeToTreeRecursive(Node *currentNode, Node *newNode);
-    void addNodeToTree(Node *node);
-    void read_tree_from_file(const QString &filename);
-    void read_tree_from_text(const QString &text);
-    void printTree(QTextEdit *textEdit);
-    void printTreeRecursive(Node *node, const QString &prefix, bool isLast, QString &treeOutput);
 };
 
 #endif // BINARYTREE_H

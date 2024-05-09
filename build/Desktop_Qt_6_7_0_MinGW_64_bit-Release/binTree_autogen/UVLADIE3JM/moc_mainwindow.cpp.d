@@ -1,6 +1,7 @@
 C:/Users/pyanc/Desktop/qt/binTree/binTree/build/Desktop_Qt_6_7_0_MinGW_64_bit-Release/binTree_autogen/UVLADIE3JM/moc_mainwindow.cpp: C:/Users/pyanc/Desktop/qt/binTree/binTree/src/mainwindow.h \
   C:/Users/pyanc/Desktop/qt/binTree/binTree/build/Desktop_Qt_6_7_0_MinGW_64_bit-Release/binTree_autogen/moc_predefs.h \
   C:/Qt/6.7.0/mingw_64/include/QtCore/QDebug \
+  C:/Qt/6.7.0/mingw_64/include/QtCore/QElapsedTimer \
   C:/Qt/6.7.0/mingw_64/include/QtCore/QFile \
   C:/Qt/6.7.0/mingw_64/include/QtCore/QList \
   C:/Qt/6.7.0/mingw_64/include/QtCore/QMap \

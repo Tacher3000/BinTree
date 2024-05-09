@@ -19,35 +19,28 @@ GenDialog::GenDialog(QWidget *parent) : QDialog(parent)
     m_quantity->setMinimumSize(400, 50);
     mainLayout->addWidget(m_quantity);
 
-    // Создание радиокнопок
     QRadioButton *radioButton1 = new QRadioButton("ТЕКСТОВЫЙ ВЫВОД", this);
     QRadioButton *radioButton2 = new QRadioButton("ГРАФИЧЕСКИЙ ВЫВОД (НЕ РЕКОМЕНДУЕЦА ИСПОЛЬЗОВАТЬ ЕСЛИ КОЛЛИЧЕСТВО ВЕРШИН БОЛЬШЕ 100.000)", this);
     QRadioButton *radioButton3 = new QRadioButton("БЕЗ ВЫВОДА", this);
 
-    // Группировка радиокнопок (чтобы они работали как единое целое)
     QButtonGroup *buttonGroup = new QButtonGroup(this);
     buttonGroup->addButton(radioButton1);
     buttonGroup->addButton(radioButton2);
     buttonGroup->addButton(radioButton3);
 
-    // Добавление радиокнопок на форму
     mainLayout->addWidget(radioButton1);
     mainLayout->addWidget(radioButton2);
     mainLayout->addWidget(radioButton3);
 
-    // Устанавливаем одну из кнопок по умолчанию выбранной
     radioButton2->setChecked(true);
 
-    // Добавление чекбокса "Сохранить в файл"
     m_saveToFileCheckbox = new QCheckBox("Сохранить в файл", this);
     mainLayout->addWidget(m_saveToFileCheckbox);
 
-    // Связываем сигнал "stateChanged" чекбокса с нашим слотом
     connect(m_saveToFileCheckbox, &QCheckBox::stateChanged, this, &GenDialog::toggleDirectorySelection);
 
     QHBoxLayout *directoryLayout = new QHBoxLayout;
 
-    // Выбор директории для сохранения файла
     m_directoryLine = new QLineEdit(this);
     m_directoryLine->setPlaceholderText("ПУТЬ");
     m_directoryLine->setMinimumSize(300, 50);
@@ -59,8 +52,6 @@ GenDialog::GenDialog(QWidget *parent) : QDialog(parent)
     m_directoryButton->setEnabled(false);
     directoryLayout->addWidget(m_directoryButton);
 
-
-    // Связываем нажатие кнопки с выбором директории
     connect(m_directoryButton, &QPushButton::clicked, this, &GenDialog::selectDirectory);
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
@@ -99,7 +90,7 @@ QString GenDialog::getSelectedOption()
             return button->text();
         }
     }
-    return QString(); // Если ни одна кнопка не выбрана (такого не может быть)
+    return QString();
 }
 
 bool GenDialog::getCheckbox(){
@@ -112,7 +103,6 @@ QString GenDialog::getPathDic(){
 
 void GenDialog::toggleDirectorySelection(int state)
 {
-    // Включаем или выключаем выбор директории в зависимости от состояния чекбокса
     m_directoryButton->setEnabled(state == Qt::Checked);
     m_directoryLine->setEnabled(state == Qt::Checked);
 }
@@ -121,7 +111,6 @@ void GenDialog::selectDirectory()
 {
     QString directory = QFileDialog::getExistingDirectory(this, tr("Выберите директорию для сохранения файла"), QDir::homePath());
 
-    // Проверяем, была ли выбрана директория
     if (!directory.isEmpty()) {
         m_directoryLine->setText(directory);
     }

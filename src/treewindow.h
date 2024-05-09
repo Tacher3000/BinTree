@@ -12,6 +12,11 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QCheckBox>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFileDialog>
+#include <QRadioButton>
+#include <QButtonGroup>
 
 #include "binarytree.h"
 #include "scalablegraphicsview.h"
@@ -34,6 +39,9 @@ public:
     void enterTree();
     void fromFile(const QString &filePath, OutputType outputType);
     void textEditChanged();
+    void searchSubtrees();
+    void changeNodeColor(Node *node, const QColor &color);
+
 signals:
     void clickedExit();
 private slots:
@@ -70,6 +78,7 @@ private:
     QTextEdit *m_treeOutput;
 
     QCheckBox *m_dynamicUpdateCheckBox;
+    BinaryTree *m_searchStructure;
 };
 
 #endif // TREEWINDOW_H

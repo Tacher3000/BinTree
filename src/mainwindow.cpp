@@ -52,36 +52,29 @@ void MainWindow::enterTree()
 
 void MainWindow::searchTree()
 {
-    // Создаем диалоговое окно для выбора типа вывода
     QDialog dialog(this);
     dialog.setWindowTitle(tr("Выберите тип вывода"));
     QVBoxLayout layout(&dialog);
 
-    // Создаем чекбоксы для текстового и графического вывода
     QCheckBox *textCheckBox = new QCheckBox(tr("Текстовый вывод"), &dialog);
     QCheckBox *graphicCheckBox = new QCheckBox(tr("Графический вывод"), &dialog);
     layout.addWidget(textCheckBox);
     layout.addWidget(graphicCheckBox);
 
-    // Создаем кнопку "OK" для подтверждения выбора
     QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
                                Qt::Horizontal, &dialog);
     layout.addWidget(&buttonBox);
 
-    // Обрабатываем нажатие кнопки "OK"
     QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
-    // Если диалоговое окно было подтверждено, обрабатываем выбор
     if (dialog.exec() == QDialog::Accepted) {
         bool textOutput = textCheckBox->isChecked();
         bool graphicOutput = graphicCheckBox->isChecked();
 
-        // Открываем диалоговое окно выбора файла
         QString filePath = QFileDialog::getOpenFileName(this, tr("Выберите файл"), QDir::homePath(), tr("Текстовые файлы (*.txt)"));
 
         if (!filePath.isEmpty()) {
-            // В зависимости от выбора, вызываем соответствующую функцию и передаем путь к файлу
             if (textOutput && !graphicOutput) {
                 m_treeWindow->fromFile(filePath, TreeWindow::TextOutput);
             } else if (graphicOutput && !textOutput) {

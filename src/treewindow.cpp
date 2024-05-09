@@ -4,6 +4,7 @@ TreeWindow::TreeWindow(QWidget *parent)
     : QWidget{parent}
 {
     m_tree = new BinaryTree;
+    m_searchStructure = new BinaryTree;
     m_scene = new QGraphicsScene(this);
     m_view = new ScalableGraphicsView(this);
 
@@ -15,6 +16,7 @@ TreeWindow::TreeWindow(QWidget *parent)
     m_searchButton = new QPushButton(this);
     m_searchButton->setText("НАЙТИ ПОДДЕРЕВО");
     m_searchButton->setMinimumSize(400, 50);
+    connect(m_searchButton, &QPushButton::clicked, this, &TreeWindow::searchSubtrees);
 
     m_exitButton = new QPushButton(this);
     m_exitButton->setText("ВЕРНУТЬСЯ НА ГЛАВНЫЙ ЭКРАН");
@@ -48,11 +50,13 @@ void TreeWindow::randomInsertion(int start, int end, int quantity, bool checkBox
     m_checkBox = checkBox;
     m_patchDic = pathDic;
     m_output = output;
-    m_tree->random_insertion(start, end, quantity);
+    m_tree->randomInsertion(start, end, quantity);
 
     if(checkBox){
-        m_tree->write_tree_to_file(pathDic + "/" + QString::number(quantity) + ".txt");
+        m_tree->writeTreeToFile(pathDic + "/" + QString::number(quantity) + ".txt");
     }
+
+    qDebug() << "размер дерева: " << m_tree->size();
 
     QHBoxLayout * mainLayout = new QHBoxLayout(this);
 
@@ -64,9 +68,9 @@ void TreeWindow::randomInsertion(int start, int end, int quantity, bool checkBox
         break;
     case 2:
         m_treeOutput->setVisible(0);
-        levelWidth = calculateLevelWidth(m_tree->root);
+        levelWidth = calculateLevelWidth(m_tree->getRoot());
 
-        addNodesToScene(*m_scene, m_tree->root, 0, 0, 200, levelWidth);
+        addNodesToScene(*m_scene, m_tree->getRoot(), 0, 0, 200, levelWidth);
 
         m_view->setScene(m_scene);
         mainLayout->addWidget(m_view);
@@ -93,9 +97,9 @@ void TreeWindow::enterTree()
     m_treeOutput->setVisible(0);
     m_textEdit->setReadOnly(false);
 
-    qreal levelWidth = calculateLevelWidth(m_tree->root);
+    qreal levelWidth = calculateLevelWidth(m_tree->getRoot());
 
-    addNodesToScene(*m_scene, m_tree->root, 0, 0, 200, levelWidth);
+    addNodesToScene(*m_scene, m_tree->getRoot(), 0, 0, 200, levelWidth);
 
     m_view->setScene(m_scene);
 
@@ -136,12 +140,11 @@ void TreeWindow::fromFile(const QString &filePath, OutputType outputType)
         m_textEdit->setText("Ошибка открытия файла!");
     }
 
-    m_tree->read_tree_from_file(filePath);
+    m_tree->readTreeFromFile(filePath);
 
     qreal levelWidth;
     QVBoxLayout * buttonLayout = new QVBoxLayout();
     QHBoxLayout * mainLayout = new QHBoxLayout(this);
-
 
     switch (outputType) {
     case TextOutput:
@@ -149,14 +152,14 @@ void TreeWindow::fromFile(const QString &filePath, OutputType outputType)
         break;
     case GraphicOutput:
         m_textEdit->setVisible(0);
-        levelWidth = calculateLevelWidth(m_tree->root);
-        addNodesToScene(*m_scene, m_tree->root, 0, 0, 200, levelWidth);
+        levelWidth = calculateLevelWidth(m_tree->getRoot());
+        addNodesToScene(*m_scene, m_tree->getRoot(), 0, 0, 200, levelWidth);
         m_view->setScene(m_scene);
         mainLayout->addWidget(m_view);
         break;
     case BothOutput:
-        levelWidth = calculateLevelWidth(m_tree->root);
-        addNodesToScene(*m_scene, m_tree->root, 0, 0, 200, levelWidth);
+        levelWidth = calculateLevelWidth(m_tree->getRoot());
+        addNodesToScene(*m_scene, m_tree->getRoot(), 0, 0, 200, levelWidth);
         m_view->setScene(m_scene);
         mainLayout->addWidget(m_view);
         buttonLayout->addWidget(m_textEdit);
@@ -191,10 +194,10 @@ void TreeWindow::textToTree()
     delete m_tree;
     m_tree = new BinaryTree;
     m_scene->clear();
-    m_tree->read_tree_from_text(m_textEdit->toPlainText());
+    m_tree->readTreeFromText(m_textEdit->toPlainText());
 
-    qreal levelWidth = calculateLevelWidth(m_tree->root);
-    addNodesToScene(*m_scene, m_tree->root, 0, 0, 200, levelWidth);
+    qreal levelWidth = calculateLevelWidth(m_tree->getRoot());
+    addNodesToScene(*m_scene, m_tree->getRoot(), 0, 0, 200, levelWidth);
 
     m_view->setScene(m_scene);
 }
@@ -205,6 +208,8 @@ void TreeWindow::addNodesToScene(QGraphicsScene &scene, Node *node, qreal x, qre
 
     QGraphicsEllipseItem* ellipseItem = scene.addEllipse(x, y, NODE_WIDTH, NODE_HEIGHT);
     ellipseItem->setBrush(Qt::lightGray);
+
+    ellipseItem->setData(0, node->id);
 
     qreal centerX = x + NODE_WIDTH / 2;
     qreal centerY = y + NODE_HEIGHT / 2;
@@ -238,4 +243,100 @@ void TreeWindow::textEditChanged() {
     if (m_dynamicUpdateCheckBox->isChecked()) {
         textToTree();
     }
+}
+
+
+void TreeWindow::searchSubtrees() {
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Выберите тип вывода"));
+    QVBoxLayout layout(&dialog);
+
+    QCheckBox *textCheckBox = new QCheckBox(tr("Записать вывод в файл"), &dialog);
+
+    QCheckBox *graphicCheckBox = new QCheckBox(tr("Графический вывод(работает только при графическом отобраении дерева)"), &dialog);
+    layout.addWidget(textCheckBox);
+    layout.addWidget(graphicCheckBox);
+
+    QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                               Qt::Horizontal, &dialog);
+    layout.addWidget(&buttonBox);
+
+    QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        bool textOutput = textCheckBox->isChecked();
+        bool graphicOutput = graphicCheckBox->isChecked();
+
+        QString filePath = QFileDialog::getOpenFileName(this, tr("Выберите файл"), QDir::homePath(), tr("Текстовые файлы (*.txt)"));
+
+        if (!filePath.isEmpty()) {
+            m_searchStructure->readTreeFromFile(filePath);
+            if (m_searchStructure == nullptr) {
+                qDebug() << "Не задана структура для поиска поддеревьев.";
+                return;
+            }
+            QList<Node*> foundSubtrees = m_tree->findSubtrees(m_searchStructure->getRoot());
+            if (textOutput && !graphicOutput) {
+
+                QFileInfo fileInfo(filePath);
+                QString outputFileName = fileInfo.baseName() + "_sub.txt";
+
+                QFile file(outputFileName);
+
+                if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                    QTextStream stream(&file);
+
+                    for (int i = 0; i < foundSubtrees.size(); ++i) {
+                        stream << foundSubtrees[i]->getId() << "\n";
+                    }
+
+                    file.close();
+                }
+            } else if (graphicOutput && !textOutput) {
+                for (Node* subtree : foundSubtrees)
+                    changeNodeColor(subtree, Qt::green);
+
+                m_view->viewport()->update();
+            } else if (textOutput && graphicOutput) {
+                for (Node* subtree : foundSubtrees)
+                    changeNodeColor(subtree, Qt::green);
+
+                m_view->viewport()->update();
+                QFileInfo fileInfo(filePath);
+                QString outputFileName = fileInfo.baseName() + "_sub.txt";
+
+                QFile file(outputFileName);
+
+                if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                    QTextStream stream(&file);
+
+                    for (int i = 0; i < foundSubtrees.size(); ++i) {
+                        stream << foundSubtrees[i]->getId() << "\n";
+                    }
+
+                    file.close();
+                }
+            }
+        }
+    }
+}
+
+
+void TreeWindow::changeNodeColor(Node* node, const QColor& color) {
+
+    if (node == nullptr)
+        return;
+
+    QList<QGraphicsItem*> items = m_scene->items();
+    for (QGraphicsItem* item : items) {
+        QGraphicsEllipseItem* ellipseItem = dynamic_cast<QGraphicsEllipseItem*>(item);
+        if (ellipseItem != nullptr && ellipseItem->data(0).toInt() == node->id) {
+            ellipseItem->setBrush(color);
+            break;
+        }
+    }
+
+    // changeNodeColor(node->left, color);
+    // changeNodeColor(node->right, color);
 }
