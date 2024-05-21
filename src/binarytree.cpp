@@ -40,17 +40,30 @@ int Node::getId()
 }
 
 size_t Node::size() {
-    size_t nodeSize = sizeof(*this); // Размер самого узла
+
+    size_t nodeSize = sizeof(*this);
     if (left != nullptr)
-        nodeSize += left->size(); // Рекурсивно добавляем размер левого поддерева
+        nodeSize += left->size();
     if (right != nullptr)
-        nodeSize += right->size(); // Рекурсивно добавляем размер правого поддерева
+        nodeSize += right->size();
     return nodeSize;
 }
 
 // Реализация методов класса BinaryTree
 
 BinaryTree::BinaryTree() : root(nullptr), nodes_amount(0) {}
+
+BinaryTree::~BinaryTree() {
+    clearTree(root);
+}
+
+void BinaryTree::clearTree(Node* node) {
+    if (node != nullptr) {
+        clearTree(node->left);
+        clearTree(node->right);
+        delete node;
+    }
+}
 
 void BinaryTree::recursiveInsert(int value) {
     root = m_recursiveInsertNode(value, root);
@@ -81,7 +94,7 @@ QList<Node*> BinaryTree::findSubtrees(Node* subtree_structure) {
     timer.start();
 
     QList<Node*> result;
-    m_dfs(root, subtree_structure, result);
+    m_findSubtrees(root, subtree_structure, result);
     qDebug() << "findSubtrees" << timer.elapsed() << "milliseconds";
     return result;
 
@@ -132,15 +145,15 @@ Node *BinaryTree::m_iterativInsertNode(int value, Node *node)
     return node;
 }
 
-void BinaryTree::m_dfs(Node* node, Node* subtree_structure, QList<Node*>& result) {
+void BinaryTree::m_findSubtrees(Node* node, Node* subtree_structure, QList<Node*>& result) {
     if (node == nullptr)
         return;
 
     if (node->equals(subtree_structure))
         result.append(node);
 
-    m_dfs(node->left, subtree_structure, result);
-    m_dfs(node->right, subtree_structure, result);
+    m_findSubtrees(node->left, subtree_structure, result);
+    m_findSubtrees(node->right, subtree_structure, result);
 
 }
 
@@ -296,5 +309,5 @@ size_t BinaryTree::size() {
     if (root == nullptr)
         return 0;
     else
-        return root->size(); // Рекурсивно вызываем метод size() от корневого узла
+        return root->size();
 }

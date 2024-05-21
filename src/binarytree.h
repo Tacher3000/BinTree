@@ -22,13 +22,15 @@ public:
     // Метод для сравнения узлов
     bool equals(Node* other);
 
+    // метод для
+    size_t size();
+
     int getId();
 
     int value;
     int id;
     Node* left;
     Node* right;
-    size_t size();
 };
 
 // Определение класса BinaryTree, представляющего бинарное дерево
@@ -37,9 +39,12 @@ public:
     // Конструктор
     BinaryTree();
 
+    ~BinaryTree();
+
     // Метод для вставки нового значения в дерево
     void recursiveInsert(int value);
 
+    // Метод для вставки нового значения в дерево
     void iterativInsert(int value);
 
     // Метод для случайной вставки значений в дерево
@@ -65,6 +70,8 @@ public:
     Node *getRoot();
 
     size_t size();
+
+    void clearTree(Node *node);
 private:
     Node* m_recursiveInsertNode(int value, Node* node);
 
@@ -72,12 +79,11 @@ private:
 
     void m_printTreeRecursive(Node *node, const QString &prefix, bool isLast, QString &treeOutput);
 
-    void m_dfs(Node* node, Node* subtree_structure, QList<Node*>& result);
+    void m_findSubtrees(Node* node, Node* subtree_structure, QList<Node*>& result);
 
 private:
     Node* root;
 
-    // Количество узлов в дереве
     int nodes_amount;
 };
 

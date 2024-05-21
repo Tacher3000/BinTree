@@ -16,7 +16,10 @@ int main(int argc, char *argv[]) {
     MainWindow w;
     w.showMaximized();
     // timeTest();
-
+    // int integer;
+    // int *ptr;
+    // qDebug() << sizeof(integer);
+    // qDebug() << sizeof(ptr);
     return app.exec();
 }
 

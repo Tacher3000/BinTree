@@ -177,6 +177,7 @@ void TreeWindow::fromFile(const QString &filePath, OutputType outputType)
 
 void TreeWindow::exit()
 {
+    delete m_tree;
     emit clickedExit();
 }
 
