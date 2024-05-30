@@ -337,7 +337,4 @@ void TreeWindow::changeNodeColor(Node* node, const QColor& color) {
             break;
         }
     }
-
-    // changeNodeColor(node->left, color);
-    // changeNodeColor(node->right, color);
 }

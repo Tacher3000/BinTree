@@ -5,12 +5,6 @@
 Node::Node(int value, int id) : value(value), id(id), left(nullptr), right(nullptr) {}
 
 bool Node::equals(Node* other) {
-    // if (!other)
-    //     return false;
-
-    // bool left_equal = (left && other->left) ? left->equals(other->left) : (left == other->left);
-    // bool right_equal = (right && other->right) ? right->equals(other->right) : (right == other->right);
-
 
     bool left_equal = false;
     bool right_equal = false;
