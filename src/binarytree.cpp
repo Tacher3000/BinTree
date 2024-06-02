@@ -84,12 +84,18 @@ void BinaryTree::randomInsertion(int start, int end, int amount) {
 }
 
 QList<Node*> BinaryTree::findSubtrees(Node* subtree_structure) {
-    QElapsedTimer timer;
-    timer.start();
+    auto start = std::chrono::high_resolution_clock::now();
 
     QList<Node*> result;
     m_findSubtrees(root, subtree_structure, result);
-    qDebug() << "findSubtrees" << timer.elapsed() << "milliseconds";
+    // qDebug() << "findSubtrees" << timer.elapsed() << "milliseconds";
+    auto end = std::chrono::high_resolution_clock::now();
+
+    // Рассчитываем длительность выполнения задачи
+    std::chrono::duration<double, std::micro> duration = end - start;
+
+    // Выводим время выполнения в микросекундах
+    qDebug() << "Время выполнения: " << duration.count() << " микросекунд";
     return result;
 
 }
